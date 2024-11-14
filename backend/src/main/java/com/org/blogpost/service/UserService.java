@@ -22,7 +22,7 @@ public class UserService {
 	private PasswordEncoder passwordEncoder;
 
 	public User registerUser(String username, String rawPassword) throws Exception {
-		System.out.println("Inside User");
+
 
 		// Validate the username
 		if (!isValidUsername(username)) {
@@ -86,15 +86,6 @@ public class UserService {
 		}
 	}
 
-	// Unlock a user account
-//	    public void unlockUser(String username) {
-//	        Optional<User> userOptional = userRepository.findByUsername(username);
-//	        if (userOptional.isPresent()) {
-//	            User user = userOptional.get();
-//	            user.setIsUserLocked(false);  // Unlock the account
-//	            userRepository.save(user);  // Persist the change
-//	        }
-//	    }
 
 	public boolean authenticateUser(String username, String rawPassword) {
 		// Fetch the user from the database by username
@@ -138,10 +129,7 @@ public class UserService {
 		return false; // Invalid password
 	}
 
-//	    public String generateAuthToken(String username) {
-//	        // For simplicity, return a mock token. Replace with JWT or other token generation.
-//	        return "mock-jwt-token-for-" + username;
-//	    }
+
 
 	public boolean unlockUser(String username) {
 		// Fetch the user from the database by username
@@ -162,18 +150,6 @@ public class UserService {
 		return true; // Account unlocked successfully
 	}
 
-//	    private static final String SECRET_KEY = "your_secret_key"; // Keep this secret and secure
-//
-//	    public String generateAuthToken(String username) {
-//	        // Set expiration to 2 minutes from the current time
-//	        Date expirationTime = new Date(System.currentTimeMillis() + 2 * 60 * 1000);
-//
-//	        return Jwts.builder()
-//	                .setSubject(username)
-//	                .setIssuedAt(new Date())
-//	                .setExpiration(expirationTime)
-//	                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-//	                .compact();
-//	    }
+
 
 }

@@ -3,6 +3,7 @@ package com.org.blogpost.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import com.org.blogpost.service.UserService;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
 	@Autowired
@@ -25,49 +27,47 @@ public class AuthController {
 
 	@Autowired
 	private JWTUtil jwtUtil;
-
 	@PostMapping("/signup")
-	public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
-		try {
-			userService.registerUser(userDTO.getUsername(), userDTO.getPassword());
-			return ResponseEntity.ok("User registered successfully");
-		} catch (Exception e) {
-			// Return a bad request with the error message
-			return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-		}
-	}
+    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
+        try {
+            userService.registerUser(userDTO.getUsername(), userDTO.getPassword());
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        } catch (Exception e) {
+            // Customize response for invalid data or other registration issues
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        }
+    }
 
-	@PostMapping("/login")
-	public ResponseEntity<String> loginUser(@RequestBody LoginDTO loginDTO) {
-		try {
-			boolean isAuthenticated = userService.authenticateUser(loginDTO.getUsername(), loginDTO.getPassword());
-			if (isAuthenticated) {
-				// Generate a JWT token with 2-minute expiration
-				String token = jwtUtil.generateToken(loginDTO.getUsername());
-				return ResponseEntity.ok("Login successful. Token: " + token);
-			} else {
-				return ResponseEntity.badRequest().body("Invalid username or password.");
-			}
-		} catch (UserLockedException e) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account locked. Please contact support.");
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error.");
-		}
-	}
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody LoginDTO loginDTO) {
+        try {
+            boolean isAuthenticated = userService.authenticateUser(loginDTO.getUsername(), loginDTO.getPassword());
+            if (isAuthenticated) {
+                String token = jwtUtil.generateToken(loginDTO.getUsername());
+                return ResponseEntity.status(HttpStatus.OK).body("Login successful. Token: " + token);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+            }
+        } catch (UserLockedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account locked. Please contact support.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error.");
+        }
+    }
 
-	@PostMapping("/unlockuser")
-	public ResponseEntity<String> unlockUser(@RequestParam String username) {
-		try {
-			boolean isUnlocked = userService.unlockUser(username);
-			if (isUnlocked) {
-				return ResponseEntity.ok("User account unlocked successfully.");
-			} else {
-				return ResponseEntity.badRequest().body("User not found or account is already unlocked.");
-			}
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("An error occurred while unlocking the user.");
-		}
-	}
+    @PostMapping("/unlockuser")
+    public ResponseEntity<String> unlockUser(@RequestParam String username) {
+        try {
+            boolean isUnlocked = userService.unlockUser(username);
+            if (isUnlocked) {
+                return ResponseEntity.status(HttpStatus.OK).body("User account unlocked successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found or account is already unlocked.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while unlocking the user.");
+        }
+    }
 
 }
