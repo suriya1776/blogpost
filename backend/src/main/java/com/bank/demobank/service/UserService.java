@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import com.bank.demobank.dto.UserDTO;
 import com.bank.demobank.enums.Role;
+import com.bank.demobank.exceptions.ConfirmPasswordException;
 import com.bank.demobank.exceptions.EmailAlreadyTakenException;
 import com.bank.demobank.exceptions.UsernameAlreadyTakenException;
 import com.bank.demobank.model.User;
@@ -23,10 +26,14 @@ public class UserService {
     private UserRepository userRepository;
 
 
+    @Autowired
+    private  PasswordEncoder passwordEncoder;
+
+
 
 
     public User registerUser(UserDTO userDTO) throws Exception{
-        System.out.println("Inside register user"+ userDTO.getRole());
+      
 
           // Validate role input
         
@@ -39,8 +46,17 @@ public class UserService {
 
         Optional<User> existingEmail = userRepository.findByEmail(userDTO.getEmail());
 
+
+
         if(existingEmail.isPresent()){
             throw new EmailAlreadyTakenException("Email address already taken");
+        }
+
+
+
+
+        if(!userDTO.getPassword().equals(userDTO.getConfirmpassword())){
+          throw new ConfirmPasswordException("Password does not match");
         }
 
         
@@ -49,7 +65,7 @@ public class UserService {
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
-        user.setPassword(userDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setEmail(userDTO.getEmail());
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -59,5 +75,7 @@ public class UserService {
 
 
     }
+
+
     
 }

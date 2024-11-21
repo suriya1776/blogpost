@@ -26,6 +26,15 @@ public class UserDTO {
     )
     private String password;
 
+    @NotBlank(message = "confirm Password cannot be blank")
+    private String confirmpassword;
+
+    public String getConfirmpassword() {
+        return confirmpassword;
+    }
+    public void setConfirmpassword(String confirmpassword) {
+        this.confirmpassword = confirmpassword;
+    }
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email should be valid")
     private String email;

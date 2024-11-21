@@ -5,23 +5,32 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests()
-                .anyRequest().permitAll()  // Allow all requests without authentication
-            .and()
-            .csrf().disable()  // Disable CSRF protection
-            .sessionManagement()
-                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS); // Stateless session (no sessions)
+    // @Bean
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .authorizeRequests()
+    //             .anyRequest().permitAll()  // Allow all requests without authentication
+    //         .and()
+    //         .csrf().disable()  // Disable CSRF protection
+    //         .sessionManagement()
+    //             .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS); // Stateless session (no sessions)
         
-        return http.build();
+    //     return http.build();
+    // }
+
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
     // @Bean
@@ -33,4 +42,17 @@ public class SecurityConfig {
     //             .build()
     //     );
     // }
+
+
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/users/login","/api/users/register").permitAll()
+                .requestMatchers("/api/users/test").authenticated()
+                .anyRequest().authenticated()
+            ).sessionManagement(session -> session.disable());
+        return http.build();
+    }
 }
